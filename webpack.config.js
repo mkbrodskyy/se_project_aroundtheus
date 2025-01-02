@@ -7,7 +7,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
   devtool: "inline-source-map",
   entry: {
-    main: "./src/pages/index.js",
+    main: "./pages/index.js",
   },
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -51,7 +51,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/index.html",
-      favicon: "./src/images/favicon.ico", // Added favicon configuration
+      // favicon: "./src/images/favicon.ico", // Added favicon configuration
     }),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin(),
