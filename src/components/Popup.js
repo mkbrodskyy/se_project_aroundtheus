@@ -22,7 +22,7 @@ class Popup {
 
     setEventListeners() {
         this._popup.addEventListener('mousedown', (event) => {
-            if (event.target.classList.contains('modal_opened') || event.target.classList.contains('popup__close')) {
+            if (event.target.classList.contains('modal_opened') || event.target.classList.contains('modal__close')) {
                 this.close();
             }
         });

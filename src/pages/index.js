@@ -35,25 +35,25 @@ const initialCards = [
 ];
 
 // ---------------- DOM Element References ----------------
-const profileEditForm = document.forms["profile-form"];
+// const profileEditForm = document.forms["profile-form"];
 const addCardForm = document.forms["card-form"];
-const profileEditModal = document.querySelector("#profile-edit-modal");
-const addCardModal = document.querySelector("#add-card-modal");
-const previewImageModal = document.querySelector("#preview-image-modal");
+// const profileEditModal = document.querySelector("#profile-edit-modal");
+// const addCardModal = document.querySelector("#add-card-modal");
+// const previewImageModal = document.querySelector("#preview-image-modal");
 const editButton = document.querySelector(".profile__edit-button");
 const addButton = document.querySelector(".profile__add-button");
-const profileTitle = document.querySelector(".profile__title");
-const profileDescription = document.querySelector(".profile__description");
+// const profileTitle = document.querySelector(".profile__title");
+// const profileDescription = document.querySelector(".profile__description");
 const profileTitleInput = document.querySelector("#profile-title-input");
 const profileDescriptionInput = document.querySelector(
   "#profile-description-input"
 );
 const cardTitleInput = document.querySelector("#card-title");
 const cardUrlInput = document.querySelector("#card-url");
-const cardsListEl = document.querySelector(".cards__list");
-const previewImage = previewImageModal.querySelector(".modal__image");
-const previewCaption = previewImageModal.querySelector(".modal__caption");
-const modalOpenedSelector = "modal_opened";
+// const cardsListEl = document.querySelector(".cards__list");
+// const previewImage = previewImageModal.querySelector(".modal__image");
+// const previewCaption = previewImageModal.querySelector(".modal__caption");
+// const modalOpenedSelector = "modal_opened";
 
 // ---------------- User Info ----------------
 const userInfo = new UserInfo({
@@ -71,76 +71,87 @@ function createCard(cardData) {
 let section = new Section(
   {
     items: initialCards,
-    renderer: (item) => {
-      let card = createCard(item);
-      section.addItem(card);
-    },
+    renderer: addCard,
   },
   ".cards__list"
 );
 section.renderItems();
 
-function handleAddCardFormSubmit(event) {
-  event.preventDefault();
+function addCard(cardData) {
+  const cardElement = createCard(cardData);
+  section.addItem(cardElement);
+}
+
+function handleAddCardFormSubmit() {
   const newCard = {
     name: cardTitleInput.value,
     link: cardUrlInput.value,
   };
-  const cardElement = createCard(newCard);
-  cardsListEl.prepend(cardElement);
-  closeModal(addCardModal);
+  addCard(newCard);
+
+  // closeModal(addCardModal);
+  addCardPopup.close();
   formValidators["card-form"].disableButton();
+  // formValidators["card-form"].resetValidation();
   addCardForm.reset();
 }
 
 // Image Click Handler
-function handleImageClick({name, link}) {
+function handleImageClick({ name, link }) {
   imagePopup.open(name, link);
 }
 
-// ---------------- Modal Control Functions ----------------
-function toggleModal(modal, isOpen = false) {
-  modal.classList.toggle(modalOpenedSelector, isOpen);
-  document[`${isOpen ? "add" : "remove"}EventListener`](
-    "keydown",
-    escapeHandler
-  );
-}
+// // ---------------- Modal Control Functions ----------------
+// function toggleModal(modal, isOpen = false) {
+//   modal.classList.toggle(modalOpenedSelector, isOpen);
+//   /* document[`${isOpen ? "add" : "remove"}EventListener`](
+//     "keydown",
+//     escapeHandler
+//   ); */
+// }
 
-function openModal(modal) {
-  toggleModal(modal, true);
-}
+// function openModal(modal) {
+//   toggleModal(modal, true);
+// }
 
-function closeModal(modal) {
-  toggleModal(modal, false);
-}
+// function closeModal(modal) {
+//   toggleModal(modal, false);
+// }
 
-function escapeHandler(event) {
+/* function escapeHandler(event) {
   if (event.key === "Escape") {
     const openedModal = document.querySelector(`.${modalOpenedSelector}`);
     if (openedModal) {
       closeModal(openedModal);
     }
   }
-}
+} */
 
 // ---------------- Popups ----------------
 const imagePopup = new PopupWithImage("#preview-image-modal");
 imagePopup.setEventListeners();
 
-const addCardPopup = new PopupWithForm("#add-card-modal", handleAddCardFormSubmit);
+const addCardPopup = new PopupWithForm(
+  "#add-card-modal",
+  handleAddCardFormSubmit
+);
 addCardPopup.setEventListeners();
-const editProfilePopup = new PopupWithForm("#profile-edit-modal", handleProfileFormSubmit);
+const editProfilePopup = new PopupWithForm(
+  "#profile-edit-modal",
+  handleProfileFormSubmit
+);
 editProfilePopup.setEventListeners();
 
 // ---------------- Form Handlers ----------------
-function handleProfileFormSubmit(event) {
-  event.preventDefault();
+function handleProfileFormSubmit(values) {
+  console.log(values);
   userInfo.setUserInfo({
-    title: profileTitleInput.value,
-    description: profileDescriptionInput.value,
+    title: values.title,
+    description: values.description,
   });
-  closeModal(profileEditModal);
+  /* closeModal(profileEditModal); */
+  // closeModal(editProfilePopup);
+  editProfilePopup.close();
 }
 
 // ---------------- Event Listeners ----------------
@@ -149,30 +160,33 @@ editButton.addEventListener("click", () => {
   profileTitleInput.value = userData.title;
   profileDescriptionInput.value = userData.description;
   formValidators["profile-form"].resetValidation();
-  openModal(profileEditModal);
+  /* openModal(profileEditModal); */
+  editProfilePopup.open();
 });
 
 addButton.addEventListener("click", () => {
-  openModal(addCardModal);
+  // openModal(addCardModal);
+  addCardPopup.open();
 });
 
 // Save Button Event Listeners
-addCardForm.addEventListener("submit", handleAddCardFormSubmit);
-profileEditForm.addEventListener("submit", handleProfileFormSubmit);
+// addCardForm.addEventListener("submit", handleAddCardFormSubmit);
+// profileEditForm.addEventListener("submit", handleProfileFormSubmit);
 
 // Combining overlay and close button listeners
-const popups = document.querySelectorAll(".modal");
+// const popups = document.querySelectorAll(".modal");
 
-popups.forEach((popup) => {
-  popup.addEventListener("mousedown", (evt) => {
-    if (
-      evt.target.classList.contains("modal_opened") ||
-      evt.target.classList.contains("modal__close")
-    ) {
-      closeModal(popup);
-    }
-  });
-});
+// popups.forEach((popup) => {
+//   popup.addEventListener("mousedown", (evt) => {
+//     if (
+//       evt.target.classList.contains("modal_opened") ||
+//       evt.target.classList.contains("modal__close")
+//     ) {
+//       // closeModal(popup);
+//       popup.classList.remove("modal_opened");
+//     }
+//   });
+// });
 
 // ---------------- Initialize Form Validators ----------------
 const settings = {
