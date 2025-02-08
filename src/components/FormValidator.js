@@ -69,7 +69,6 @@ export default class FormValidator {
     });
 
     this._toggleButtonState();
-    // this._formElement.reset()
   }
 
   disableButton() {

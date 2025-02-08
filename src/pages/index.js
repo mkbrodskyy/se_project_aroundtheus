@@ -3,8 +3,10 @@ import FormValidator from "../components/FormValidator.js";
 import "./index.css";
 import PopupWithForm from "../components/PopupWithForm.js";
 import PopupWithImage from "../components/PopupWithImage.js";
+import confirmDelete from "../components/ConfirmDelete.js";
 import Section from "../components/Section.js";
 import UserInfo from "../components/UserInfo.js";
+import Api from "../components/Api.js";
 import {
   initialCards,
   settings,
@@ -13,72 +15,91 @@ import {
   profileTitleInput,
   profileDescriptionInput,
 } from "../utils/constants.js";
-
-// ---------------- Initial Cards Data ----------------
-// const initialCards = [
-//   {
-//     name: "Yosemite Valley",
-//     link: "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/around-project/yosemite.jpg",
-//   },
-//   {
-//     name: "Lake Louise",
-//     link: "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/around-project/lake-louise.jpg",
-//   },
-//   {
-//     name: "Bald Mountains",
-//     link: "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/around-project/bald-mountains.jpg",
-//   },
-//   {
-//     name: "Latemar",
-//     link: "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/around-project/latemar.jpg",
-//   },
-//   {
-//     name: "Vanoise National Park",
-//     link: "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/around-project/vanoise.jpg",
-//   },
-//   {
-//     name: "Lago di Braies",
-//     link: "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/around-project/lago.jpg",
-//   },
-// ];
-
-// ---------------- DOM Element References ----------------
-// const profileEditForm = document.forms["profile-form"];
-// const addCardForm = document.forms["card-form"];
-// const profileEditModal = document.querySelector("#profile-edit-modal");
-// const addCardModal = document.querySelector("#add-card-modal");
-// const previewImageModal = document.querySelector("#preview-image-modal");
-
-// const cardTitleInput = document.querySelector("#card-title");
-// const cardUrlInput = document.querySelector("#card-url");
-// const cardsListEl = document.querySelector(".cards__list");
-// const previewImage = previewImageModal.querySelector(".modal__image");
-// const previewCaption = previewImageModal.querySelector(".modal__caption");
-// const modalOpenedSelector = "modal_opened";
+import { data } from "jquery";
 
 // ---------------- User Info ----------------
+
+const api = new Api({
+  baseUrl: "https://around-api.en.tripleten-services.com/v1",
+  headers: {
+    authorization: "11f34e71-370c-42ab-866a-065e85c99efb",
+    "Content-Type": "application/json",
+  },
+});
+
 const userInfo = new UserInfo({
   nameSelector: ".profile__title",
   infoSelector: ".profile__description",
-  // imageSelector: ".profile__image",
 });
+
+let section;
 
 // ---------------- Card Functions ----------------
 function createCard(cardData) {
-  const card = new Card(cardData, "#card-template", handleImageClick);
+  const card = new Card(
+    cardData,
+    "#card-template",
+    handleImageClick,
+    handleDeleteIcon,
+    handleLikeButtonClick
+  );
+  console.log(cardData);
   return card.generateCard();
 }
 
-const section = new Section(
-  {
-    items: initialCards,
-    renderer: addCard,
-  },
-  ".cards__list"
+// instead of PopupWithForm use ConfirmDelete
+const confirmDeletePopup = new confirmDelete("#delete-popup", handleFormDelete); // WRONG CLASS! should be ConfirmDelete
+// call setEventListeners on confirmDeletePopup
+confirmDeletePopup.setEventListeners();
+
+function handleFormDelete(card) {
+  console.log("Form was submitted");
+  deleteCard(card._id)
+    .then((response) => {
+      console.log("Card deleted successfully", response);
+      closePopup();
+    })
+    .catch((error) => {
+      console.error("Error deleting card", error);
+    });
+}
+
+const handleDeleteIcon = (card) => {
+  confirmDeletePopup.open(card);
+  // This is where the delete logic will live
+  confirmDeletePopup.confirmDelete(() => {
+    // Delete the card here with a fetch request
+    api
+      .deleteACard(card._data._id)
+      .then(() => {
+        card.deleteCard();
+        confirmDeletePopup.close();
+      })
+      .catch((error) => {
+        console.error("Error deleting card:", error);
+      });
+  });
+};
+
+Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
+  ([data, cards]) => {
+    userInfo.setUserInfo(data.name, data.about);
+    section = new Section(
+      {
+        items: cards,
+        renderer: (data) => {
+          // addCard(data);
+          section.addItem(createCard(data));
+        },
+      },
+      ".cards__list"
+    );
+    section.renderItems();
+  }
 );
-section.renderItems();
 
 function addCard(cardData) {
+  console.log(cardData);
   const cardElement = createCard(cardData);
   section.addItem(cardElement);
 }
@@ -88,45 +109,28 @@ function handleAddCardFormSubmit(values) {
     name: values.title,
     link: values.link,
   };
-  addCard(newCard);
 
-  // closeModal(addCardModal);
-  addCardPopup.close();
-  formValidators["card-form"].disableButton();
-  // formValidators["card-form"].resetValidation();
-  addCardPopup.getForm().reset();
+  // We get an error when deleting a card because the card we are trying to delete is not yet a card created on the server.
+  // Pass the input values
+  api
+    .createACard(newCard)
+    .then((cardData) => {
+      // add the card to the cardSection
+      addCard(cardData);
+      console.log(cardData);
+      // Close the add card modal
+      addCardPopup.close();
+      formValidators["card-form"].disableButton();
+      addCardPopup.getForm().reset();
+    })
+    .catch((err) => {
+      console.error(`Error creating card: ${err}`);
+    });
 }
 
-// Image Click Handler
 function handleImageClick({ name, link }) {
   imagePopup.open(name, link);
 }
-
-// // ---------------- Modal Control Functions ----------------
-// function toggleModal(modal, isOpen = false) {
-//   modal.classList.toggle(modalOpenedSelector, isOpen);
-//   /* document[`${isOpen ? "add" : "remove"}EventListener`](
-//     "keydown",
-//     escapeHandler
-//   ); */
-// }
-
-// function openModal(modal) {
-//   toggleModal(modal, true);
-// }
-
-// function closeModal(modal) {
-//   toggleModal(modal, false);
-// }
-
-/* function escapeHandler(event) {
-  if (event.key === "Escape") {
-    const openedModal = document.querySelector(`.${modalOpenedSelector}`);
-    if (openedModal) {
-      closeModal(openedModal);
-    }
-  }
-} */
 
 // ---------------- Popups ----------------
 const imagePopup = new PopupWithImage("#preview-image-modal");
@@ -150,8 +154,6 @@ function handleProfileFormSubmit(values) {
     title: values.title,
     description: values.description,
   });
-  /* closeModal(profileEditModal); */
-  // closeModal(editProfilePopup);
   editProfilePopup.close();
 }
 
@@ -161,59 +163,139 @@ editButton.addEventListener("click", () => {
   profileTitleInput.value = userData.title;
   profileDescriptionInput.value = userData.description;
   formValidators["profile-form"].resetValidation();
-  /* openModal(profileEditModal); */
   editProfilePopup.open();
 });
 
 addButton.addEventListener("click", () => {
-  // openModal(addCardModal);
   addCardPopup.open();
 });
 
-// Save Button Event Listeners
-// addCardForm.addEventListener("submit", handleAddCardFormSubmit);
-// profileEditForm.addEventListener("submit", handleProfileFormSubmit);
-
-// Combining overlay and close button listeners
-// const popups = document.querySelectorAll(".modal");
-
-// popups.forEach((popup) => {
-//   popup.addEventListener("mousedown", (evt) => {
-//     if (
-//       evt.target.classList.contains("modal_opened") ||
-//       evt.target.classList.contains("modal__close")
-//     ) {
-//       // closeModal(popup);
-//       popup.classList.remove("modal_opened");
-//     }
-//   });
-// });
-
 // ---------------- Initialize Form Validators ----------------
-
-// const settings = {
-//   inputSelector: ".modal__input",
-//   submitButtonSelector: ".modal__button",
-//   inactiveButtonClass: "modal__button_inactive",
-//   inputErrorClass: "modal__input_type_error",
-//   errorClass: "modal__error_visible",
-//   formSelector: ".modal__form",
-// };
-
-// Define an object for storing validators
 const formValidators = {};
 
 const enableValidation = (config) => {
   const formList = Array.from(document.querySelectorAll(config.formSelector));
   formList.forEach((formElement) => {
     const validator = new FormValidator(config, formElement);
-    // Get the name of the form
     const formName = formElement.getAttribute("name");
-
-    // Store the validator using the `name` of the form
     formValidators[formName] = validator;
     validator.enableValidation();
   });
 };
 
 enableValidation(settings);
+
+// function addNewCard(name, link) {
+//   fetch("https://around-api.en.tripleten-services.com/v1/cards", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization:
+//         '{"user":{"name":"Placeholder name","about":"Placeholder description","avatar":"https://practicum-content.s3.amazonaws.com/resources/avatar_placeholder_1704989734.svg","_id":"4f496d3f8732e1ed0d779c04"},"token":"11f34e71-370c-42ab-866a-065e85c99efb"}', // Replace with your actual token
+//     },
+//     body: JSON.stringify({
+//       name: name,
+//       link: link,
+//     }),
+//   })
+//     .then((response) => response.json())
+//     .then((data) => {
+//       console.log("New card added:", data);
+//       addCard(data);
+//     })
+//     .catch((error) => {
+//       console.error("Error adding new card:", error);
+//     });
+// }
+
+// ---------------- Delete Popup ----------------
+const deletePopup = document.getElementById("delete-popup");
+const confirmDeleteButton = document.getElementById("confirm-delete");
+
+// document.querySelectorAll('.bin-icon').forEach(binIcon => {
+//   binIcon.addEventListener('click', () => {
+//     deletePopup.style.display = 'flex';
+//   });
+// });
+
+// confirmDeleteButton.addEventListener("click", (card) => {
+//   //console log out the event
+//   api.deleteACard(card._data._id); // get a card I
+// });
+
+// Function to handle adding a like
+// function addLike(cardId) {
+//   return fetch(`https://around-api.en.tripleten-services.com/v1/cards/${cardId}/likes`, {
+//     method: 'PUT',
+//     headers: {
+//       authorization: '11f34e71-370c-42ab-866a-065e85c99efb',
+//       'Content-Type': 'application/json'
+//     }
+//   })
+//   .then(response => response.json())
+//   .then(data => {
+//     // Update the heart icon color
+//     document.querySelector(`#like-icon-${cardId}`).classList.add('liked');
+//     return data;
+//   })
+//   .catch(error => console.error('Error:', error));
+// }
+
+// Function to handle removing a like
+// function removeLike(cardId) {
+//   return fetch(`https://around-api.en.tripleten-services.com/v1/cards/${cardId}/likes`, {
+//     method: 'DELETE',
+//     headers: {
+//       authorization: '11f34e71-370c-42ab-866a-065e85c99efb',
+//       'Content-Type': 'application/json'
+//     }
+//   })
+//   .then(response => response.json())
+//   .then(data => {
+//     // Update the heart icon color
+//     document.querySelector(`#like-icon-${cardId}`).classList.remove('liked');
+//     return data;
+//   })
+//   .catch(error => console.error('Error:', error));
+// }
+
+// Create a handleLikeCard function
+// Inside the function call your api.deleteACard method
+// Inside of the then block, console.log(response)
+
+function handleLikeCard(cardId) {
+  api.deleteACard(cardId).then((response) => {
+    console.log(response);
+    // // Update the heart icon color
+    // document.querySelector(`#like-icon-${cardId}`).classList.remove('liked');
+    return response;
+  });
+  // .catch(error => console.error('Error:', error));
+}
+
+// Function to handle like button click
+function handleLikeButtonClick(card) {
+  console.log(card);
+  if (card.isLiked) {
+    api
+      .dislikeacard(card._data._id)
+      .then((response) => {
+        console.log(response);
+        card.setLikeStatus(response.isLiked);
+      })
+      .catch((error) => console.error("Error:", error));
+  } else {
+    api
+      .likeaCard(card._data._id)
+      .then((response) => {
+        console.log(response);
+        card.setLikeStatus(response.isLiked);
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+}
+
+// Add event listener to like buttons
+document.querySelectorAll(".like-button").forEach((button) => {
+  button.addEventListener("click", handleLikeButtonClick);
+});
