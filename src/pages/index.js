@@ -147,6 +147,12 @@ const editProfilePopup = new PopupWithForm(
 );
 editProfilePopup.setEventListeners();
 
+const avatarPopup = new PopupWithForm(
+  "#avatar-edit-modal",
+  handleAvatarFormSubmit
+);
+avatarPopup.setEventListeners();
+
 // ---------------- Form Handlers ----------------
 function handleProfileFormSubmit(values) {
   console.log(values);
@@ -155,6 +161,18 @@ function handleProfileFormSubmit(values) {
     description: values.description,
   });
   editProfilePopup.close();
+}
+
+function handleAvatarFormSubmit(values) {
+  api
+    .updateUserAvatar(values.avatar)
+    .then((data) => {
+      userInfo.setUserAvatar(data.avatar);
+      avatarPopup.close();
+    })
+    .catch((err) => {
+      console.error(`Error updating avatar: ${err}`);
+    });
 }
 
 // ---------------- Event Listeners ----------------
@@ -298,4 +316,56 @@ function handleLikeButtonClick(card) {
 // Add event listener to like buttons
 document.querySelectorAll(".like-button").forEach((button) => {
   button.addEventListener("click", handleLikeButtonClick);
+});
+
+// ---------------- Profile Picture ----------------
+const profilePicture = document.querySelector(".profile__image");
+const editIcon = document.querySelector(".profile__image-edit");
+
+// profilePicture.addEventListener("mouseover", () => {
+//   editIcon.style.display = "block";
+// });
+
+// profilePicture.addEventListener("mouseout", () => {
+//   editIcon.style.display = "none";
+// });
+
+editIcon.addEventListener("click", () => {
+  avatarPopup.open();
+});
+
+editIcon.addEventListener("click", () => {
+  avatarPopup.open();
+});
+
+// When the pencil icon is clicked open a modal (see figma)
+// To open this modal instantiate a new PopupWithForm
+// // Inside of this make a request to your edit profile API
+// avatarPopup.setSubmitHandler((values) => {
+//   api.updateUserAvatar(values.avatar)
+//     .then((data) => {
+//       userInfo.setUserAvatar(data.avatar);
+//       avatarPopup.close();
+//     })
+//     .catch((err) => {
+//       console.error(`Error updating avatar: ${err}`);
+//     });
+// });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const forms = document.querySelectorAll('.modal__form');
+
+  forms.forEach(form => {
+    form.addEventListener('submit', (event) => {
+      const submitButton = form.querySelector('.modal__button');
+      submitButton.textContent = 'Saving...';
+      submitButton.disabled = true;
+
+      // Simulate form submission process
+      // setTimeout(() => {
+      //   submitButton.textContent = 'Save';
+      //   submitButton.disabled = false;
+      // }, 2000); // Replace this with actual form submission logic
+    });
+  });
 });

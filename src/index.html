@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta content="ie=edge" http-equiv="X-UA-Compatible" />
     <title>Around The U.S.</title>
     <!-- CSS Files -->
     <!-- <link rel="stylesheet" href="./pages/index.css" -->
@@ -18,11 +19,14 @@
       </header>
       <main class="content">
         <section class="profile page__section">
-          <img
-            src="<%=require('./images/avatar.jpg')%>"
-            alt="avatar"
-            class="profile__image"
-          />
+          <div class="profile__image-container">
+            <img
+              src="<%=require('./images/avatar.jpg')%>"
+              alt="avatar"
+              class="profile__image"
+            />
+            <button class="profile__image-edit"></button>
+          </div>
           <div class="profile__info">
             <h1 class="profile__title" id="profile-title">Jacques Cousteau</h1>
             <button
@@ -47,6 +51,31 @@
       <footer class="footer page__section">
         <p class="footer__text">&copy; 2022 Around The U.S.</p>
       </footer>
+    </div>
+    <!-- Edit Avatar Modal -->
+    <div class="modal" id="avatar-edit-modal">
+      <div class="modal__container">
+        <button
+          class="modal__close"
+          type="button"
+          aria-label="Close modal"
+        ></button>
+        <h2 class="modal__title">Change profile picture</h2>
+        <form class="modal__form" name="avatar-form">
+          <div class="modal__input-container">
+            <input
+              class="modal__input"
+              type="url"
+              name="avatar"
+              id="avatar-url"
+              placeholder="Image URL"
+              required
+            />
+            <span class="modal__error" id="avatar-url-error"></span>
+          </div>
+          <button class="modal__button" type="submit" disabled>Save</button>
+        </form>
+      </div>
     </div>
     <!-- Edit Profile Modal -->
     <div class="modal" id="profile-edit-modal">

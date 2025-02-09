@@ -19,7 +19,8 @@ export default class Api {
     });
   }
 
-  createACard(cardData) { // double check all requests use API methods, not random functions
+  createACard(cardData) {
+    // double check all requests use API methods, not random functions
     return fetch(`${this.baseUrl}/cards`, {
       method: "POST",
       headers: this.headers,
@@ -31,7 +32,7 @@ export default class Api {
       return Promise.reject(`Error: ${res.status}`);
     });
   }
-  
+
   likeaCard(cardId) {
     return fetch(`${this.baseUrl}/cards/${cardId}/likes`, {
       method: "PUT",
@@ -55,7 +56,7 @@ export default class Api {
       return Promise.reject(`Error: ${res.status}`);
     });
   }
-  
+
   dislikeacard(cardId) {
     return fetch(`${this.baseUrl}/cards/${cardId}/likes`, {
       method: "DELETE",
@@ -97,7 +98,9 @@ export default class Api {
     return fetch(`${this.baseUrl}/users/me/avatar`, {
       method: "PATCH",
       headers: this.headers,
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        avatar: data.link,
+      }),
     }).then((res) => {
       if (res.ok) {
         return res.json();
