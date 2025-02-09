@@ -30,6 +30,7 @@ const api = new Api({
 const userInfo = new UserInfo({
   nameSelector: ".profile__title",
   infoSelector: ".profile__description",
+  imageSelector: ".profile__image",
 });
 
 let section;
@@ -47,9 +48,7 @@ function createCard(cardData) {
   return card.generateCard();
 }
 
-// instead of PopupWithForm use ConfirmDelete
 const confirmDeletePopup = new confirmDelete("#delete-popup", handleFormDelete); // WRONG CLASS! should be ConfirmDelete
-// call setEventListeners on confirmDeletePopup
 confirmDeletePopup.setEventListeners();
 
 function handleFormDelete(card) {
@@ -66,9 +65,7 @@ function handleFormDelete(card) {
 
 const handleDeleteIcon = (card) => {
   confirmDeletePopup.open(card);
-  // This is where the delete logic will live
   confirmDeletePopup.confirmDelete(() => {
-    // Delete the card here with a fetch request
     api
       .deleteACard(card._data._id)
       .then(() => {
@@ -110,15 +107,11 @@ function handleAddCardFormSubmit(values) {
     link: values.link,
   };
 
-  // We get an error when deleting a card because the card we are trying to delete is not yet a card created on the server.
-  // Pass the input values
   api
     .createACard(newCard)
     .then((cardData) => {
-      // add the card to the cardSection
       addCard(cardData);
       console.log(cardData);
-      // Close the add card modal
       addCardPopup.close();
       formValidators["card-form"].disableButton();
       addCardPopup.getForm().reset();
@@ -203,89 +196,13 @@ const enableValidation = (config) => {
 
 enableValidation(settings);
 
-// function addNewCard(name, link) {
-//   fetch("https://around-api.en.tripleten-services.com/v1/cards", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization:
-//         '{"user":{"name":"Placeholder name","about":"Placeholder description","avatar":"https://practicum-content.s3.amazonaws.com/resources/avatar_placeholder_1704989734.svg","_id":"4f496d3f8732e1ed0d779c04"},"token":"11f34e71-370c-42ab-866a-065e85c99efb"}', // Replace with your actual token
-//     },
-//     body: JSON.stringify({
-//       name: name,
-//       link: link,
-//     }),
-//   })
-//     .then((response) => response.json())
-//     .then((data) => {
-//       console.log("New card added:", data);
-//       addCard(data);
-//     })
-//     .catch((error) => {
-//       console.error("Error adding new card:", error);
-//     });
-// }
-
 // ---------------- Delete Popup ----------------
 const deletePopup = document.getElementById("delete-popup");
 const confirmDeleteButton = document.getElementById("confirm-delete");
 
-// document.querySelectorAll('.bin-icon').forEach(binIcon => {
-//   binIcon.addEventListener('click', () => {
-//     deletePopup.style.display = 'flex';
-//   });
-// });
-
-// confirmDeleteButton.addEventListener("click", (card) => {
-//   //console log out the event
-//   api.deleteACard(card._data._id); // get a card I
-// });
-
-// Function to handle adding a like
-// function addLike(cardId) {
-//   return fetch(`https://around-api.en.tripleten-services.com/v1/cards/${cardId}/likes`, {
-//     method: 'PUT',
-//     headers: {
-//       authorization: '11f34e71-370c-42ab-866a-065e85c99efb',
-//       'Content-Type': 'application/json'
-//     }
-//   })
-//   .then(response => response.json())
-//   .then(data => {
-//     // Update the heart icon color
-//     document.querySelector(`#like-icon-${cardId}`).classList.add('liked');
-//     return data;
-//   })
-//   .catch(error => console.error('Error:', error));
-// }
-
-// Function to handle removing a like
-// function removeLike(cardId) {
-//   return fetch(`https://around-api.en.tripleten-services.com/v1/cards/${cardId}/likes`, {
-//     method: 'DELETE',
-//     headers: {
-//       authorization: '11f34e71-370c-42ab-866a-065e85c99efb',
-//       'Content-Type': 'application/json'
-//     }
-//   })
-//   .then(response => response.json())
-//   .then(data => {
-//     // Update the heart icon color
-//     document.querySelector(`#like-icon-${cardId}`).classList.remove('liked');
-//     return data;
-//   })
-//   .catch(error => console.error('Error:', error));
-// }
-
-// Create a handleLikeCard function
-// Inside the function call your api.deleteACard method
-// Inside of the then block, console.log(response)
-
 function handleLikeCard(cardId) {
   api.deleteACard(cardId).then((response) => {
     console.log(response);
-    // // Update the heart icon color
-    // document.querySelector(`#like-icon-${cardId}`).classList.remove('liked');
     return response;
   });
   // .catch(error => console.error('Error:', error));
@@ -322,14 +239,6 @@ document.querySelectorAll(".like-button").forEach((button) => {
 const profilePicture = document.querySelector(".profile__image");
 const editIcon = document.querySelector(".profile__image-edit");
 
-// profilePicture.addEventListener("mouseover", () => {
-//   editIcon.style.display = "block";
-// });
-
-// profilePicture.addEventListener("mouseout", () => {
-//   editIcon.style.display = "none";
-// });
-
 editIcon.addEventListener("click", () => {
   avatarPopup.open();
 });
@@ -337,20 +246,6 @@ editIcon.addEventListener("click", () => {
 editIcon.addEventListener("click", () => {
   avatarPopup.open();
 });
-
-// When the pencil icon is clicked open a modal (see figma)
-// To open this modal instantiate a new PopupWithForm
-// // Inside of this make a request to your edit profile API
-// avatarPopup.setSubmitHandler((values) => {
-//   api.updateUserAvatar(values.avatar)
-//     .then((data) => {
-//       userInfo.setUserAvatar(data.avatar);
-//       avatarPopup.close();
-//     })
-//     .catch((err) => {
-//       console.error(`Error updating avatar: ${err}`);
-//     });
-// });
 
 document.addEventListener('DOMContentLoaded', () => {
   const forms = document.querySelectorAll('.modal__form');
@@ -360,12 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitButton = form.querySelector('.modal__button');
       submitButton.textContent = 'Saving...';
       submitButton.disabled = true;
-
-      // Simulate form submission process
-      // setTimeout(() => {
-      //   submitButton.textContent = 'Save';
-      //   submitButton.disabled = false;
-      // }, 2000); // Replace this with actual form submission logic
     });
   });
 });
