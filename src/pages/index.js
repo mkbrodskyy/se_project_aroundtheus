@@ -15,7 +15,6 @@ import {
   profileTitleInput,
   profileDescriptionInput,
 } from "../utils/constants.js";
-import { data } from "jquery";
 
 // ---------------- User Info ----------------
 
@@ -48,7 +47,7 @@ function createCard(cardData) {
   return card.generateCard();
 }
 
-const confirmDeletePopup = new confirmDelete("#delete-popup", handleFormDelete); // WRONG CLASS! should be ConfirmDelete
+const confirmDeletePopup = new confirmDelete("#delete-popup", handleFormDelete);
 confirmDeletePopup.setEventListeners();
 
 function handleFormDelete(card) {
@@ -86,7 +85,7 @@ Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
         items: cards,
         renderer: (data) => {
           // addCard(data);
-          section.addItem(createCard(data));
+          section.addItem(createCard(data), true);
         },
       },
       ".cards__list"
