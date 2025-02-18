@@ -8,9 +8,6 @@ class PopupWithForm extends Popup {
     this._inputList = this._form
       ? this._form.querySelectorAll(".modal__input")
       : [];
-    // this._submitButton = this._form
-    //   ? this._form.querySelector(".popup__submit")
-    //   : null;
   }
 
   _getInputValues() {
@@ -27,28 +24,18 @@ class PopupWithForm extends Popup {
 
   setEventListeners() {
     super.setEventListeners();
-    // if (this._form) {
     this._form.addEventListener("submit", (evt) => {
       evt.preventDefault();
 
       this._handleFormSubmit(this._getInputValues());
     });
-    // }
   }
 
   setInputValues(data) {
     this._inputList.forEach((input) => {
-      // Here you insert the `value` by the `name` of the input
       input.value = data[input.name];
     });
   }
-
-//   close() {
-//     if (this._form) {
-//       this._form.reset();
-//     }
-//     super.close();
-//   }
 }
 
 export default PopupWithForm;
