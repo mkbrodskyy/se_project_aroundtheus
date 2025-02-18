@@ -15,6 +15,7 @@ import {
   profileTitleInput,
   profileDescriptionInput,
 } from "../utils/constants.js";
+import Popup from "../components/Popup.js";
 
 // ---------------- User Info ----------------
 
@@ -79,7 +80,8 @@ const handleDeleteIcon = (card) => {
 
 Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
   ([data, cards]) => {
-    userInfo.setUserInfo(data.name, data.about);
+    console.log(data);
+    userInfo.setUserInfo(data);
     section = new Section(
       {
         items: cards,
@@ -92,7 +94,18 @@ Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
     );
     section.renderItems();
   }
-);
+).catch(err => {
+  console.log(err);
+ });
+//  .finally();
+
+// // api.someMethod()
+// .then(res => {
+//   // here is the response that should be used to update the DOM.
+//   // also in `then` you should close the popup
+//   })
+//   .catch(err => // here you catch possible errors)
+//   .finally(() => // here you return the default button text back )
 
 function addCard(cardData) {
   console.log(cardData);
@@ -105,7 +118,8 @@ function handleAddCardFormSubmit(values) {
     name: values.title,
     link: values.link,
   };
-
+  // renderLoading true
+  renderLoading("#add-card-modal", true);
   api
     .createACard(newCard)
     .then((cardData) => {
@@ -114,6 +128,8 @@ function handleAddCardFormSubmit(values) {
       addCardPopup.close();
       formValidators["card-form"].disableButton();
       addCardPopup.getForm().reset();
+      //render Loading back to false
+      renderLoading("#add-card-modal", false);
     })
     .catch((err) => {
       console.error(`Error creating card: ${err}`);
@@ -148,22 +164,37 @@ avatarPopup.setEventListeners();
 // ---------------- Form Handlers ----------------
 function handleProfileFormSubmit(values) {
   console.log(values);
-  userInfo.setUserInfo({
-    title: values.title,
-    description: values.description,
-  });
-  editProfilePopup.close();
+  renderLoading("#profile-edit-modal", true);
+  api
+    .updateUserInfo({
+      name: values.title,
+      about: values.description,
+    })
+    .then((data) => {
+      console.log(data);
+      userInfo.setUserInfo(data);
+      editProfilePopup.close();
+    })
+    .catch((err) => {
+      console.error(`Error updating user info: ${err}`);
+    })
+    .finally(() => {
+      renderLoading("#profile-edit-modal", false);
+    });
 }
 
 function handleAvatarFormSubmit(values) {
+  renderLoading("#avatar-edit-modal", true);
   api
     .updateUserAvatar(values.avatar)
     .then((data) => {
       userInfo.setUserAvatar(data.avatar);
       avatarPopup.close();
+      renderLoading("#avatar-edit-modal", false);
     })
     .catch((err) => {
       console.error(`Error updating avatar: ${err}`);
+      renderLoading("#avatar-edit-modal", false);
     });
 }
 
@@ -203,8 +234,8 @@ function handleLikeCard(cardId) {
   api.deleteACard(cardId).then((response) => {
     console.log(response);
     return response;
-  });
-  // .catch(error => console.error('Error:', error));
+  })
+  .catch(error => console.error('Error:', error));
 }
 
 // Function to handle like button click
@@ -246,14 +277,18 @@ editIcon.addEventListener("click", () => {
   avatarPopup.open();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const forms = document.querySelectorAll('.modal__form');
+function renderLoading(popupSelector, isLoading) {
+  const currentSubmitButton = document
+    .querySelector(popupSelector)
+    .querySelector(".modal__button");
+  if (isLoading) {
+    currentSubmitButton.textContent = "Saving...";
+  } else {
+    currentSubmitButton.textContent = "Save";
+  }
+}
 
-  forms.forEach(form => {
-    form.addEventListener('submit', (event) => {
-      const submitButton = form.querySelector('.modal__button');
-      submitButton.textContent = 'Saving...';
-      submitButton.disabled = true;
-    });
-  });
-});
+// submit functions for popupWithForm instances
+// 1 for editing profile and 1 for editing avatar
+// call renderLoading with popup selector and pass true immediately when function gets invoked
+// at the end of the then block, call renderLoading with popup selector and pass false

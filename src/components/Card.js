@@ -46,6 +46,9 @@ class Card {
     this._element
       .querySelector(".card__image")
       .addEventListener("click", () => this._handleImageClick(this._data));
+
+      this._element.addEventListener("click", () => this._handleImageLike(this._data));
+      // 
   }
 
   // _handleLikeIcon() {
@@ -69,7 +72,7 @@ class Card {
   // }
 
   setLikeStatus(isLiked) {
-    console.log(isLiked);
+    // console.log(isLiked);
     this.isLiked = isLiked;
     this._updateLikes();
   }
