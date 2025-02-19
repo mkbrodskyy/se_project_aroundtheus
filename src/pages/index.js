@@ -3,7 +3,7 @@ import FormValidator from "../components/FormValidator.js";
 import "./index.css";
 import PopupWithForm from "../components/PopupWithForm.js";
 import PopupWithImage from "../components/PopupWithImage.js";
-import confirmDelete from "../components/ConfirmDelete.js";
+import ConfirmDelete from "../components/ConfirmDelete.js";
 import Section from "../components/Section.js";
 import UserInfo from "../components/UserInfo.js";
 import Api from "../components/Api.js";
@@ -48,7 +48,7 @@ function createCard(cardData) {
   return card.generateCard();
 }
 
-const confirmDeletePopup = new confirmDelete("#delete-popup", handleFormDelete);
+const confirmDeletePopup = new ConfirmDelete("#delete-popup", handleFormDelete);
 confirmDeletePopup.setEventListeners();
 
 function handleFormDelete(card) {
@@ -65,9 +65,9 @@ function handleFormDelete(card) {
 
 const handleDeleteIcon = (card) => {
   confirmDeletePopup.open(card);
-  confirmDeletePopup.confirmDelete(() => {
+  confirmDeletePopup.ConfirmDelete(() => {
     api
-      .deleteACard(card._data._id)
+      .deleteACard(card.data._id)
       .then(() => {
         card.deleteCard();
         confirmDeletePopup.close();
@@ -86,7 +86,6 @@ Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
       {
         items: cards,
         renderer: (data) => {
-          // addCard(data);
           section.addItem(createCard(data), true);
         },
       },
@@ -97,15 +96,6 @@ Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
 ).catch(err => {
   console.log(err);
  });
-//  .finally();
-
-// // api.someMethod()
-// .then(res => {
-//   // here is the response that should be used to update the DOM.
-//   // also in `then` you should close the popup
-//   })
-//   .catch(err => // here you catch possible errors)
-//   .finally(() => // here you return the default button text back )
 
 function addCard(cardData) {
   console.log(cardData);
@@ -118,7 +108,6 @@ function handleAddCardFormSubmit(values) {
     name: values.title,
     link: values.link,
   };
-  // renderLoading true
   renderLoading("#add-card-modal", true);
   api
     .createACard(newCard)
@@ -128,8 +117,7 @@ function handleAddCardFormSubmit(values) {
       addCardPopup.close();
       formValidators["card-form"].disableButton();
       addCardPopup.getForm().reset();
-      //render Loading back to false
-    //   renderLoading("#add-card-modal", false);
+
     })
     .catch((err) => {
       console.error(`Error creating card: ${err}`);
@@ -193,13 +181,11 @@ function handleAvatarFormSubmit(values) {
     .then((data) => {
       userInfo.setUserAvatar(data.avatar);
       avatarPopup.close();
-      // renderLoading("#avatar-edit-modal", false);
     })
     .catch((err) => {
       console.error(`Error updating avatar: ${err}`);
-      // renderLoading("#avatar-edit-modal", false);
     })
-    .finally(renderLoading("#avatar-edit-modal", false));
+    .finally(()=> renderLoading("#avatar-edit-modal", false));
 }
 
 // ---------------- Event Listeners ----------------
@@ -242,7 +228,6 @@ function handleLikeCard(cardId) {
   .catch(error => console.error('Error:', error));
 }
 
-// Function to handle like button click
 function handleLikeButtonClick(card) {
   console.log(card);
   if (card.isLiked) {
@@ -263,11 +248,6 @@ function handleLikeButtonClick(card) {
       .catch((error) => console.error("Error:", error));
   }
 }
-
-// Add event listener to like buttons
-// document.querySelectorAll(".like-button").forEach((button) => {
-//   button.addEventListener("click", handleLikeButtonClick);
-// });
 
 // ---------------- Profile Picture ----------------
 const profilePicture = document.querySelector(".profile__image");

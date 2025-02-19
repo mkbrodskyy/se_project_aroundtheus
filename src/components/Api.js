@@ -21,7 +21,6 @@ export default class Api {
     }).then(this._checkResponse)}
 
   createACard(cardData) {
-    // double check all requests use API methods, not random functions
     return fetch(`${this.baseUrl}/cards`, {
       method: "POST",
       headers: this.headers,
