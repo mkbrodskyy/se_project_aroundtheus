@@ -65,7 +65,7 @@ function handleFormDelete(card) {
 
 const handleDeleteIcon = (card) => {
   confirmDeletePopup.open(card);
-  confirmDeletePopup.ConfirmDelete(() => {
+  confirmDeletePopup.handleConfirmDelete(() => {
     api
       .deleteACard(card.data._id)
       .then(() => {
@@ -78,8 +78,8 @@ const handleDeleteIcon = (card) => {
   });
 };
 
-Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
-  ([data, cards]) => {
+Promise.all([api.getUserInfo(), api.getInitialCards()])
+  .then(([data, cards]) => {
     console.log(data);
     userInfo.setUserInfo(data);
     section = new Section(
@@ -92,10 +92,10 @@ Promise.all([api.getUserInfo(), api.getInitialCards()]).then(
       ".cards__list"
     );
     section.renderItems();
-  }
-).catch(err => {
-  console.log(err);
- });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 function addCard(cardData) {
   console.log(cardData);
@@ -117,7 +117,6 @@ function handleAddCardFormSubmit(values) {
       addCardPopup.close();
       formValidators["card-form"].disableButton();
       addCardPopup.getForm().reset();
-
     })
     .catch((err) => {
       console.error(`Error creating card: ${err}`);
@@ -185,7 +184,7 @@ function handleAvatarFormSubmit(values) {
     .catch((err) => {
       console.error(`Error updating avatar: ${err}`);
     })
-    .finally(()=> renderLoading("#avatar-edit-modal", false));
+    .finally(() => renderLoading("#avatar-edit-modal", false));
 }
 
 // ---------------- Event Listeners ----------------
@@ -221,26 +220,29 @@ const deletePopup = document.getElementById("delete-popup");
 const confirmDeleteButton = document.getElementById("confirm-delete");
 
 function handleLikeCard(cardId) {
-  api.deleteACard(cardId).then((response) => {
-    console.log(response);
-    return response;
-  })
-  .catch(error => console.error('Error:', error));
+  api
+    .deleteACard(cardId)
+    .then((response) => {
+      console.log(response);
+      return response;
+    })
+    .catch((error) => console.error("Error:", error));
 }
 
 function handleLikeButtonClick(card) {
   console.log(card);
   if (card.isLiked) {
     api
-      .dislikeacard(card._data._id)
+      .dislikeacard(card.data._id)
       .then((response) => {
         console.log(response);
         card.setLikeStatus(response.isLiked);
       })
       .catch((error) => console.error("Error:", error));
-  } else { console.log(card._data._id);
+  } else {
+    console.log(card.data._id);
     api
-      .likeaCard(card._data._id)
+      .likeaCard(card.data._id)
       .then((response) => {
         console.log(response);
         card.setLikeStatus(response.isLiked);

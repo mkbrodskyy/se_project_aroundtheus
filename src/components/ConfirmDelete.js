@@ -11,7 +11,7 @@ class ConfirmDelete extends Popup {
     super.open();
   }
 
-  confirmDelete(confirmation) {
+  handleConfirmDelete(confirmation) {
     this._handleFormSubmit = confirmation;
   }
 
