@@ -36,8 +36,6 @@ export const settings = {
 
 export const editButton = document.querySelector(".profile__edit-button");
 export const addButton = document.querySelector(".profile__add-button");
-// const profileTitle = document.querySelector(".profile__title");
-// const profileDescription = document.querySelector(".profile__description");
 export const profileTitleInput = document.querySelector("#profile-title-input");
 export const profileDescriptionInput = document.querySelector(
   "#profile-description-input"

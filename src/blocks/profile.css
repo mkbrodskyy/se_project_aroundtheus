@@ -74,6 +74,31 @@
   background-position: center;
 }
 
+.profile__image-edit {
+  background: transparent url("../images/Pencil.svg") center no-repeat;
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: none;
+  border-radius: 50%;
+  visibility: hidden;
+  z-index: 1;
+}
+
+.profile__image-container {
+  display: grid;
+}
+
+.profile__image-container:hover .profile__image {
+  opacity: 40%;
+  transition: 0.3s ease;
+}
+
+.profile__image-container:hover .profile__image-edit {
+  cursor: pointer;
+  visibility: visible;
+}
+
 @media screen and (max-width: 879px) {
   .profile {
     flex-direction: column;
