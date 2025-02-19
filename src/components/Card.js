@@ -47,8 +47,7 @@ class Card {
       .querySelector(".card__image")
       .addEventListener("click", () => this._handleImageClick(this._data));
 
-      this._element.addEventListener("click", () => this._handleImageLike(this._data));
-      // 
+      // this._element.addEventListener("click", () => this._handleLikeIcon(this._data));
   }
 
   // _handleLikeIcon() {

@@ -129,10 +129,13 @@ function handleAddCardFormSubmit(values) {
       formValidators["card-form"].disableButton();
       addCardPopup.getForm().reset();
       //render Loading back to false
-      renderLoading("#add-card-modal", false);
+    //   renderLoading("#add-card-modal", false);
     })
     .catch((err) => {
       console.error(`Error creating card: ${err}`);
+    })
+    .finally(() => {
+      renderLoading("#add-card-modal", false);
     });
 }
 
@@ -190,12 +193,13 @@ function handleAvatarFormSubmit(values) {
     .then((data) => {
       userInfo.setUserAvatar(data.avatar);
       avatarPopup.close();
-      renderLoading("#avatar-edit-modal", false);
+      // renderLoading("#avatar-edit-modal", false);
     })
     .catch((err) => {
       console.error(`Error updating avatar: ${err}`);
-      renderLoading("#avatar-edit-modal", false);
-    });
+      // renderLoading("#avatar-edit-modal", false);
+    })
+    .finally(renderLoading("#avatar-edit-modal", false));
 }
 
 // ---------------- Event Listeners ----------------
@@ -249,7 +253,7 @@ function handleLikeButtonClick(card) {
         card.setLikeStatus(response.isLiked);
       })
       .catch((error) => console.error("Error:", error));
-  } else {
+  } else { console.log(card._data._id);
     api
       .likeaCard(card._data._id)
       .then((response) => {
@@ -261,9 +265,9 @@ function handleLikeButtonClick(card) {
 }
 
 // Add event listener to like buttons
-document.querySelectorAll(".like-button").forEach((button) => {
-  button.addEventListener("click", handleLikeButtonClick);
-});
+// document.querySelectorAll(".like-button").forEach((button) => {
+//   button.addEventListener("click", handleLikeButtonClick);
+// });
 
 // ---------------- Profile Picture ----------------
 const profilePicture = document.querySelector(".profile__image");
@@ -287,8 +291,3 @@ function renderLoading(popupSelector, isLoading) {
     currentSubmitButton.textContent = "Save";
   }
 }
-
-// submit functions for popupWithForm instances
-// 1 for editing profile and 1 for editing avatar
-// call renderLoading with popup selector and pass true immediately when function gets invoked
-// at the end of the then block, call renderLoading with popup selector and pass false
